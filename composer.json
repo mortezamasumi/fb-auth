@@ -1,0 +1,78 @@
+{
+    "name": "mortezamasumi/fb-auth",
+    "description": "Provide auth functioning",
+    "keywords": [
+        "mortezamasumi",
+        "laravel",
+        "fb-auth"
+    ],
+    "homepage": "https://github.com/mortezamasumi/fb-auth",
+    "support": {
+        "issues": "https://github.com/mortezamasumi/fb-auth/issues",
+        "source": "https://github.com/mortezamasumi/fb-auth"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Morteza Masumi",
+            "email": "morteza.masumi@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "ariaieboy/filament-jalali": "^2.0",
+        "filament/filament": "^4.0",
+        "mortezamasumi/sms": "^2.0|dev-main",
+        "spatie/laravel-package-tools": "^1.0"
+    },
+    "require-dev": {
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-arch": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "pestphp/pest-plugin-livewire": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mortezamasumi\\FbAuth\\": "src/",
+            "Mortezamasumi\\FbAuth\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mortezamasumi\\FbAuth\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mortezamasumi\\FbAuth\\FbAuthServiceProvider"
+            ],
+            "aliases": {
+                "FbAuth": "Mortezamasumi\\FbAuth\\Facades\\FbAuth"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mortezamasumi/sms"
+        }
+    ]
+}
