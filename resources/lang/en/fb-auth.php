@@ -37,10 +37,13 @@ return [
     'notification' => [
         'title' => 'Profile updated successfully',
     ],
+    'otp' => [
+        'resend-action' => 'Resend code',
+        'resend_in' => 'Resend code in:',
+        'validation' => 'Code is not correct',
+        'expired' => 'Code is expired, request to resend',
+    ],
     'reset-password' => [
-        'otp-validation' => 'Code is not correct',
-        'otp-expired' => 'Code is expired, request to resend',
-        'resend-code' => 'Resend code',
         'request' => [
             'notification' => [
                 'mobile' => [

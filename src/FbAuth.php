@@ -41,10 +41,11 @@ class FbAuth
         };
 
         Cache::forget('otp-'.$identifire);
+
         Cache::add(
             'otp-'.$identifire,
-            $code,
-            (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire') * 2
+            [$code, now()],
+            (int) config('fb-auth.otp_expiration')
         );
 
         return $code;

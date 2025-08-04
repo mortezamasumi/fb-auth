@@ -2,7 +2,9 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
+use Closure;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
@@ -25,8 +27,6 @@ use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetEmailCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
-use Closure;
-use Exception;
 
 class ResetPassword extends BaseResetPassword
 {
@@ -134,7 +134,8 @@ class ResetPassword extends BaseResetPassword
         return $schema
             ->components([
                 TextInput::make('otp')
-                    ->hiddenLabel()
+                    ->label('Enter code sent to mobile')
+                    ->required()
                     ->rules([
                         fn (): Closure => function (string $attribute, $value, Closure $fail) {
                             $code = Cache::get('otp-'.match (config('app.auth_type')) {
@@ -143,17 +144,18 @@ class ResetPassword extends BaseResetPassword
                             });
 
                             if (! $code) {
-                                $fail(__('fb-auth::fb-auth.reset-password.otp-expired'));
+                                $fail(__('fb-auth::fb-auth.otp.expired'));
                             }
 
                             if ($value !== $code) {
-                                $fail(__('fb-auth::fb-auth.reset-password.otp-validation'));
+                                $fail(__('fb-auth::fb-auth.otp.validation'));
                             }
                         }
                     ])
                     ->hintAction(
                         Action::make('resend-code')
-                            ->label(__('fb-auth::fb-auth.reset-password.resend-code'))
+                            ->label(__('fb-auth::fb-auth.otp.resend-action'))
+                            ->view('fb-auth::resend-action')
                             ->action(fn ($state) => $this->resend())
                     )
                     ->hidden(config('app.auth_type') === AuthType::Link),
