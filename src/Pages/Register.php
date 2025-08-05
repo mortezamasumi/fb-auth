@@ -6,7 +6,13 @@ use Filament\Auth\Pages\Register as BaseRegister;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 use Mortezamasumi\FbAuth\Enums\AuthType;
+use Mortezamasumi\FbAuth\Facades\FbAuth;
+use Mortezamasumi\FbAuth\Notifications\VerifyCodeNotification;
+use Mortezamasumi\FbAuth\Notifications\VerifyMobileNotification;
+use Exception;
 
 class Register extends BaseRegister
 {
@@ -48,5 +54,44 @@ class Register extends BaseRegister
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
+    }
+
+    protected function sendEmailVerificationNotification(Model $user): void
+    {
+        if (! $user instanceof MustVerifyEmail) {
+            return;
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return;
+        }
+
+        if (config('app.auth_type') === AuthType::User) {
+            return;
+        }
+
+        if (config('app.auth_type') === AuthType::Link) {
+            parent::sendEmailVerificationNotification($user);
+
+            return;
+        }
+
+        if (! method_exists($user, 'notify')) {
+            $userClass = $user::class;
+
+            throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
+        }
+
+        $notification = app(
+            match (config('app.auth_type')) {
+                AuthType::Code => VerifyCodeNotification::class,
+                AuthType::Mobile => VerifyMobileNotification::class,
+            },
+            [
+                'code' => FbAuth::createCode($user)
+            ]
+        );
+
+        $user->notify($notification);
     }
 }

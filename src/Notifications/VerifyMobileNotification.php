@@ -1,0 +1,31 @@
+<?php
+
+namespace Mortezamasumi\FbAuth\Notifications;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+
+class VerifyMobileNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    public $url;
+
+    public function __construct(
+        protected string $code,
+    ) {}
+
+    public function via($notifiable)
+    {
+        return ['sms'];
+    }
+
+    public function toSms(object $notifiable): string
+    {
+        return __('fb-auth::fb-auth.verify.text-message', [
+            'app' => __(config('app.name')),
+            'code' => $this->code,
+        ]);
+    }
+}

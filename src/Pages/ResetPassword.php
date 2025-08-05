@@ -2,9 +2,7 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
-use Closure;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
@@ -12,6 +10,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\PasswordResetLinkSent;
@@ -25,8 +24,10 @@ use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
-use Mortezamasumi\FbAuth\Notifications\PasswordResetEmailCodeNotification;
+use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
+use Closure;
+use Exception;
 
 class ResetPassword extends BaseResetPassword
 {
@@ -133,56 +134,42 @@ class ResetPassword extends BaseResetPassword
     {
         return $schema
             ->components([
-                TextInput::make('otp')
-                    ->label('Enter code sent to mobile')
-                    ->required()
-                    ->rules([
-                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                            $code = Cache::get('otp-'.match (config('app.auth_type')) {
-                                AuthType::Mobile => $this->mobile,
-                                AuthType::Code => $this->email,
-                            });
-
-                            if (! $code) {
-                                $fail(__('fb-auth::fb-auth.otp.expired'));
-                            }
-
-                            if ($value !== $code) {
-                                $fail(__('fb-auth::fb-auth.otp.validation'));
-                            }
-                        }
-                    ])
-                    ->hintAction(
-                        Action::make('resend-code')
-                            ->label(__('fb-auth::fb-auth.otp.resend-action'))
-                            ->view('fb-auth::resend-action')
-                            ->action(fn ($state) => $this->resend())
-                    )
-                    ->hidden(config('app.auth_type') === AuthType::Link),
-                $this
-                    ->getEmailFormComponent()
-                    ->visible(config('app.auth_type') === AuthType::Link),
+                $this->getOTPFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
     }
 
-    // protected function getCodeFormComponent(): Component
-    // {
-    //     return OTPInput::make('code')
-    //         ->hiddenLabel()
-    //         ->required()
-    //         ->rules([
-    //             fn (): Closure => function (string $attribute, $value, Closure $fail) {
-    //                 $code = Cache::get('email-code-verify-otp-'.$this->email);
+    protected function getOTPFormComponent(): Component
+    {
+        return TextInput::make('otp')
+            ->label('Enter code sent to mobile')
+            ->required()
+            ->autocomplete()
+            ->autofocus()
+            ->rules([
+                fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                    [$code, $time] = Cache::get('otp-'.match (config('app.auth_type')) {
+                        AuthType::Mobile => $this->mobile,
+                        AuthType::Code => $this->email,
+                    });
 
-    //                 if ($value !== $code) {
-    //                     $fail(Lang::get('email-code-verify::email-code-verify.reset-password.form.code.error'));
-    //                 }
-    //             }
-    //         ])
-    //         ->dehydrated(false);
-    // }
+                    if (! $code) {
+                        $fail(__('fb-auth::fb-auth.otp.expired'));
+                    }
+
+                    if ($value !== $code) {
+                        $fail(__('fb-auth::fb-auth.otp.validation'));
+                    }
+                }
+            ])
+            ->hintAction(
+                Action::make('resend-code')
+                    ->label(__('fb-auth::fb-auth.otp.resend-action'))
+                    ->view('fb-auth::resend-action')
+                    ->action(fn ($state) => $this->resend())
+            );
+    }
 
     public function resend(): void
     {
@@ -216,7 +203,7 @@ class ResetPassword extends BaseResetPassword
 
                 $notification = app(
                     match (config('app.auth_type')) {
-                        AuthType::Code => PasswordResetEmailCodeNotification::class,
+                        AuthType::Code => PasswordResetCodeNotification::class,
                         AuthType::Mobile => PasswordResetMobileNotification::class,
                     },
                     [
@@ -268,10 +255,6 @@ class ResetPassword extends BaseResetPassword
             case AuthType::Code:
                 $title = 'fb-auth::fb-auth.reset-password.request.notification.code.title';
                 $body = 'fb-auth::fb-auth.reset-password.request.notification.code.body';
-                break;
-            case AuthType::Link:
-                $title = $status;
-                $body = 'filament-panels::auth/pages/password-reset/request-password-reset.notifications.sent.body';
                 break;
         }
 

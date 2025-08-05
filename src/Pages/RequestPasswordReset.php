@@ -4,7 +4,6 @@ namespace Mortezamasumi\FbAuth\Pages;
 
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Actions\Action;
-use Filament\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
@@ -16,7 +15,7 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Support\Facades\Password;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
-use Mortezamasumi\FbAuth\Notifications\PasswordResetEmailCodeNotification;
+use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
 use Exception;
 
@@ -58,13 +57,13 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
     public function request(): void
     {
-        // try {
-        //     $this->rateLimit(2);
-        // } catch (TooManyRequestsException $exception) {
-        //     $this->getRateLimitedNotification($exception)?->send();
+        try {
+            $this->rateLimit(2);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
 
-        //     return;
-        // }
+            return;
+        }
 
         $data = $this->form->getState();
 
@@ -86,8 +85,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
                 $notification = app(
                     match (config('app.auth_type')) {
-                        AuthType::Link => ResetPasswordNotification::class,
-                        AuthType::Code => PasswordResetEmailCodeNotification::class,
+                        AuthType::Code => PasswordResetCodeNotification::class,
                         AuthType::Mobile => PasswordResetMobileNotification::class,
                     },
                     [
@@ -99,7 +97,10 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                 $notification->url = Filament::getResetPasswordUrl(
                     $token,
                     $user,
-                    ['mobile' => $user->mobile]
+                    match (config('app.auth_type')) {
+                        AuthType::Code => [],
+                        AuthType::Mobile => ['mobile' => $user->mobile],
+                    }
                 );
 
                 /** @var Notifiable $user */
@@ -119,11 +120,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
         $this->getSentNotification($status)?->send();
 
-        if (config('app.auth_type') === AuthType::Link) {
-            $this->form->fill();
-        } else {
-            redirect($notification->url);
-        }
+        redirect($notification->url);
     }
 
     /**
@@ -133,7 +130,6 @@ class RequestPasswordReset extends BaseRequestPasswordReset
     protected function getCredentialsFromFormData(array $data): array
     {
         return match (config('app.auth_type')) {
-            AuthType::Link,
             AuthType::Code => ['email' => $data['email']],
             AuthType::Mobile => ['mobile' => $data['mobile']],
         };
@@ -149,10 +145,6 @@ class RequestPasswordReset extends BaseRequestPasswordReset
             case AuthType::Code:
                 $title = 'fb-auth::fb-auth.reset-password.request.notification.code.title';
                 $body = 'fb-auth::fb-auth.reset-password.request.notification.code.body';
-                break;
-            case AuthType::Link:
-                $title = $status;
-                $body = 'filament-panels::auth/pages/password-reset/request-password-reset.notifications.sent.body';
                 break;
         }
 

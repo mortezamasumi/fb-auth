@@ -3,11 +3,10 @@
 namespace Mortezamasumi\FbAuth\Notifications;
 
 use Filament\Auth\Notifications\ResetPassword;
-use Illuminate\Auth\Notifications\ResetPassword as BaseNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\HtmlString;
 
-class PasswordResetEmailCodeNotification extends ResetPassword
+class PasswordResetCodeNotification extends ResetPassword
 {
     protected string $code;
 

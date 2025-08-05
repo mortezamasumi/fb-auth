@@ -2,15 +2,16 @@
 
 namespace Mortezamasumi\FbAuth;
 
-use Exception;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Mortezamasumi\FbAuth\Enums\AuthType;
-use Mortezamasumi\FbAuth\Pages\MobileLogin;
+use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
+use Mortezamasumi\FbAuth\Pages\Login;
 use Mortezamasumi\FbAuth\Pages\Register;
 use Mortezamasumi\FbAuth\Pages\RequestPasswordReset;
 use Mortezamasumi\FbAuth\Pages\ResetPassword;
-use Mortezamasumi\FbAuth\Pages\UsernameLogin;
+use Mortezamasumi\FbAuth\Pages\VerificationPrompt;
+use Exception;
 
 class FbAuthPlugin implements Plugin
 {
@@ -21,37 +22,40 @@ class FbAuthPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $this->checkSetup();
+        $this->checkConfig();
 
         $this->registerAuthType();
 
-        if (config('app.auth_tye') === AuthType::Link) {
-            if ($panel->hasEmailVerification()) {
-                $panel->emailChangeVerification();
-            }
-
-            return;
-        }
-
-        if ($panel->hasLogin() && config('app.auth_tye') === AuthType::User) {
-            $panel
-                ->login(UsernameLogin::class)
-                ->emailVerification(null)
-                ->passwordReset(null, null);
-
-            return;
-        }
-
-        if ($panel->hasLogin() && config('app.auth_tye') === AuthType::Mobile) {
-            $panel->login(MobileLogin::class);
+        if ($panel->hasLogin()) {
+            $panel->login(Login::class);
         }
 
         if ($panel->hasRegistration()) {
             $panel->registration(Register::class);
         }
 
-        if ($panel->hasPasswordReset()) {
-            $panel->passwordReset(RequestPasswordReset::class, ResetPassword::class);
+        switch (config('app.auth_type')) {
+            case AuthType::Link:
+                if ($panel->hasEmailVerification()) {
+                    $panel->emailChangeVerification();
+                }
+                break;
+
+            case AuthType::User:
+                $panel
+                    ->emailVerification(null)
+                    ->passwordReset(null, null);
+                break;
+
+            default:
+                if ($panel->hasPasswordReset()) {
+                    $panel->passwordReset(RequestPasswordReset::class, ResetPassword::class);
+                }
+
+                if ($panel->hasEmailVerification()) {
+                    $panel->emailVerification(VerificationPrompt::class);
+                }
+                break;
         }
     }
 
@@ -59,9 +63,9 @@ class FbAuthPlugin implements Plugin
     {
         if (config('fb-auth.email_required')) {
             if (config('fb-auth.email_link_verification')) {
-                $type = AuthType::Link;
+                config(['app.auth_type' => AuthType::Link]);
             } else {
-                $type = AuthType::Code;
+                config(['app.auth_type' => AuthType::Code]);
             }
         } else {
             if (config('fb-auth.email_link_verification')) {
@@ -69,27 +73,21 @@ class FbAuthPlugin implements Plugin
             }
 
             if (config('fb-auth.mobile_required')) {
-                $type = AuthType::Mobile;
+                config(['app.auth_type' => AuthType::Mobile]);
             } else {
-                $type = AuthType::User;
+                config(['app.auth_type' => AuthType::User]);
             }
         }
-
-        config(['app.auth_type' => $type]);
     }
 
-    protected function checkSetup(): void
+    protected function checkConfig(): void
     {
         $trueCount = collect(config('fb-auth'))
             ->only(['mobile_required', 'email_required', 'username_required'])
             ->filter()
             ->count();
 
-        if ($trueCount === 1) {
-            return;
-        }
-
-        throw new Exception('Only and required one of link/code/mobile auth types to be selected');
+        throw_unless($trueCount === 1, new AuthTypeException());
     }
 
     public function boot(Panel $panel): void

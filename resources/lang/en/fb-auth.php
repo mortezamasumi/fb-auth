@@ -41,7 +41,7 @@ return [
         'resend-action' => 'Resend code',
         'resend_in' => 'Resend code in:',
         'validation' => 'Code is not correct',
-        'expired' => 'Code is expired, request to resend',
+        'expired' => 'Code has been expired, request to resend',
     ],
     'reset-password' => [
         'request' => [
@@ -69,6 +69,19 @@ return [
             'action' => 'Reset Password',
             'timeout' => 'This code will expire in :count minutes.',
             'ending' => 'If you did not request a password reset, no further action is required.',
+            'salutation' => 'ًRegards,<br>:name',
+        ],
+    ],
+    'verify' => [
+        'text-message' => ':app, Password reset code: :code',
+        'mail-message' => [
+            'subject' => 'Verify Email Address',
+            'greeting' => 'Hello!',
+            'line1' => 'You are receiving this email containing code because there is an account registered with this email.',
+            'line2' => 'Please enter the follwing code into the verification page.',
+            'action' => 'Verify Email Address',
+            'timeout' => 'This code will expire in :count minutes.',
+            'ending' => 'If you did not create an account, no further action is required.',
             'salutation' => 'ًRegards,<br>:name',
         ],
     ],
