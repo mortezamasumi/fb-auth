@@ -43,3 +43,45 @@ window.otpResend = function (num, locale) {
         },
     }
 }
+
+window.otpInput = function (length) {
+    return {
+        length,
+        init() {
+            this.$nextTick(() => {
+                Array.from(Array(this.length)).forEach((element, i) => {
+                    let ref = document.querySelector(
+                        '[x-ref="input_' + i + '"]',
+                    )
+                    ref.value = this.state[i] || ''
+                })
+            })
+        },
+        handleInput(e) {
+            this.state = Array.from(Array(this.length), (_, i) => {
+                let ref = document.querySelector('[x-ref="input_' + i + '"]')
+                return ref.value || ''
+            }).join('')
+
+            if (e.target.nextElementSibling && e.target.value) {
+                e.target.nextElementSibling.focus()
+            }
+        },
+        handlePaste(e) {
+            this.state = e.clipboardData.getData('text')
+
+            Array.from(Array(this.length)).forEach((element, i) => {
+                let ref = document.querySelector('[x-ref="input_' + i + '"]')
+                ref.value = this.state[i] || ''
+            })
+        },
+        handleDelete(e) {
+            let key = e.keyCode || e.charCode
+            if (key == 8 || key == 46) {
+                if (e.target !== this.$refs.input_0) {
+                    e.target.previousElementSibling.focus()
+                }
+            }
+        },
+    }
+}

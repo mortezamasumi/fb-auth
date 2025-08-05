@@ -143,7 +143,10 @@ class ResetPassword extends BaseResetPassword
     protected function getOTPFormComponent(): Component
     {
         return TextInput::make('otp')
-            ->label('Enter code sent to mobile')
+            ->label(__(match (config('app.auth_type')) {
+                AuthType::Mobile => 'fb-auth::fb-auth.otp.mobile_label',
+                AuthType::Code => 'fb-auth::fb-auth.otp.code_label',
+            }))
             ->required()
             ->autocomplete()
             ->autofocus()
@@ -165,7 +168,7 @@ class ResetPassword extends BaseResetPassword
             ])
             ->hintAction(
                 Action::make('resend-code')
-                    ->label(__('fb-auth::fb-auth.otp.resend-action'))
+                    ->label(__('fb-auth::fb-auth.otp.resend_action'))
                     ->view('fb-auth::resend-action')
                     ->action(fn ($state) => $this->resend())
             );
@@ -249,12 +252,12 @@ class ResetPassword extends BaseResetPassword
     {
         switch (config('app.auth_type')) {
             case AuthType::Mobile:
-                $title = 'fb-auth::fb-auth.reset-password.request.notification.mobile.title';
-                $body = 'fb-auth::fb-auth.reset-password.request.notification.mobile.body';
+                $title = 'fb-auth::fb-auth.reset_password.request.notification.mobile.title';
+                $body = 'fb-auth::fb-auth.reset_password.request.notification.mobile.body';
                 break;
             case AuthType::Code:
-                $title = 'fb-auth::fb-auth.reset-password.request.notification.code.title';
-                $body = 'fb-auth::fb-auth.reset-password.request.notification.code.body';
+                $title = 'fb-auth::fb-auth.reset_password.request.notification.code.title';
+                $body = 'fb-auth::fb-auth.reset_password.request.notification.code.body';
                 break;
         }
 

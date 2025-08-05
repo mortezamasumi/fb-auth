@@ -23,7 +23,7 @@ class VerifyMobileNotification extends Notification implements ShouldQueue
 
     public function toSms(object $notifiable): string
     {
-        return __('fb-auth::fb-auth.verify.text-message', [
+        return __('fb-auth::fb-auth.verify.text_message', [
             'app' => __(config('app.name')),
             'code' => $this->code,
         ]);

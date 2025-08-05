@@ -37,10 +37,14 @@ return [
     'notification' => [
         'title' => 'پروفایل با موفقیت بروزرسانی شد',
     ],
-    'reset-password' => [
-        'otp-validation' => 'کد صحیح نیست',
-        'otp-expired' => 'کد منقضی شده است، دوباره درخواست دهید',
-        'resend-code' => 'ارسال مجدد کد',
+    'otp' => [
+        'resend_code' => 'ارسال مجدد کد',
+        'validation' => 'کد صحیح نیست',
+        'expired' => 'کد منقضی شده است، دوباره درخواست دهید',
+        'mobile_label' => 'کدی را که به شماره همراه شما ارسال شده وارد کنید',
+        'code_label' => 'کدی را که به آدرس ایمیل شما ارسال شده وارد کنید',
+    ],
+    'reset_password' => [
         'request' => [
             'notification' => [
                 'mobile' => [
@@ -57,8 +61,8 @@ return [
                 'mobile' => 'ارسال پیامک',
             ]
         ],
-        'text-message' => ':app, کد جهت تغییر رمز: :code',
-        'mail-message' => [
+        'text_message' => ':app, کد جهت تغییر رمز: :code',
+        'mail_message' => [
             'subject' => 'پیام بازنشانی رمزعبور',
             'greeting' => 'سلام',
             'line1' => 'شما این پیام که دربرگیرنده یک کد ۴ رقمی است را به دلیل درخواست بازنشانی رمز عبور، دریافت کردید ',

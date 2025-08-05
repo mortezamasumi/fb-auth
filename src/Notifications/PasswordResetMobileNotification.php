@@ -23,7 +23,7 @@ class PasswordResetMobileNotification extends Notification implements ShouldQueu
 
     public function toSms(object $notifiable): string
     {
-        return __('fb-auth::fb-auth.reset-password.text-message', [
+        return __('fb-auth::fb-auth.reset_password.text_message', [
             'app' => __(config('app.name')),
             'code' => $this->code,
         ]);

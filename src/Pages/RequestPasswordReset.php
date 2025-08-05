@@ -49,8 +49,8 @@ class RequestPasswordReset extends BaseRequestPasswordReset
         return Action::make('request')
             ->label(__(
                 config('app.auth_type') === AuthType::Mobile
-                    ? 'fb-auth::fb-auth.reset-password.request.action.mobile'
-                    : 'fb-auth::fb-auth.reset-password.request.action.email'
+                    ? 'fb-auth::fb-auth.reset_password.request.action.mobile'
+                    : 'fb-auth::fb-auth.reset_password.request.action.email'
             ))
             ->submit('request');
     }
@@ -139,12 +139,12 @@ class RequestPasswordReset extends BaseRequestPasswordReset
     {
         switch (config('app.auth_type')) {
             case AuthType::Mobile:
-                $title = 'fb-auth::fb-auth.reset-password.request.notification.mobile.title';
-                $body = 'fb-auth::fb-auth.reset-password.request.notification.mobile.body';
+                $title = 'fb-auth::fb-auth.reset_password.request.notification.mobile.title';
+                $body = 'fb-auth::fb-auth.reset_password.request.notification.mobile.body';
                 break;
             case AuthType::Code:
-                $title = 'fb-auth::fb-auth.reset-password.request.notification.code.title';
-                $body = 'fb-auth::fb-auth.reset-password.request.notification.code.body';
+                $title = 'fb-auth::fb-auth.reset_password.request.notification.code.title';
+                $body = 'fb-auth::fb-auth.reset_password.request.notification.code.body';
                 break;
         }
 

@@ -18,11 +18,13 @@ use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\VerifyCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\VerifyMobileNotification;
+use Closure;
 use Exception;
 
 class VerificationPrompt extends EmailVerificationPrompt
@@ -30,7 +32,7 @@ class VerificationPrompt extends EmailVerificationPrompt
     use WithRateLimiting;
 
     /** @var array<string, mixed> | null */
-    public ?array $data = [];
+    public ?array $data = ['otp' => ''];
     public ?string $mobile = null;
     public ?string $email = null;
 
@@ -78,13 +80,33 @@ class VerificationPrompt extends EmailVerificationPrompt
     protected function getOTPFormComponent(): Component
     {
         return TextInput::make('otp')
-            ->label('Enter code sent to mobile/email')
+            ->label(__(match (config('app.auth_type')) {
+                AuthType::Mobile => 'fb-auth::fb-auth.otp.mobile_label',
+                AuthType::Code => 'fb-auth::fb-auth.otp.code_label',
+            }))
             ->required()
+            ->view('fb-auth::otp-input')
             ->autocomplete()
             ->autofocus()
+            ->rules([
+                fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                    [$code, $time] = Cache::get('otp-'.match (config('app.auth_type')) {
+                        AuthType::Mobile => $this->mobile,
+                        AuthType::Code => $this->email,
+                    });
+
+                    if (! $code) {
+                        $fail(__('fb-auth::fb-auth.otp.expired'));
+                    }
+
+                    if ($value !== $code) {
+                        $fail(__('fb-auth::fb-auth.otp.validation'));
+                    }
+                }
+            ])
             ->hintAction(
                 Action::make('resend-code')
-                    ->label(__('fb-auth::fb-auth.otp.resend-action'))
+                    ->label(__('fb-auth::fb-auth.otp.resend_action'))
                     ->view('fb-auth::resend-action')
                     ->action(fn ($state) => $this->resend())
             );
@@ -113,12 +135,18 @@ class VerificationPrompt extends EmailVerificationPrompt
 
     public function getTitle(): string|Htmlable
     {
-        return __('Verify otp');
+        return __(match (config('app.auth_type')) {
+            AuthType::Mobile => 'fb-auth::fb-auth.otp.verify_mobile_title',
+            AuthType::Code => 'fb-auth::fb-auth.otp.verify_code_title',
+        });
     }
 
     public function getHeading(): string|Htmlable
     {
-        return __('Verify otp');
+        return __(match (config('app.auth_type')) {
+            AuthType::Mobile => 'fb-auth::fb-auth.otp.verify_mobile_title',
+            AuthType::Code => 'fb-auth::fb-auth.otp.verify_code_title',
+        });
     }
 
     /**
@@ -134,7 +162,7 @@ class VerificationPrompt extends EmailVerificationPrompt
     protected function getRequestFormAction(): Action
     {
         return Action::make('verify-otp')
-            ->label(__('verify'))
+            ->label(__('fb-auth::fb-auth.verify.prompt.action.label'))
             ->submit('verify');
     }
 
@@ -177,20 +205,6 @@ class VerificationPrompt extends EmailVerificationPrompt
         return 'form';
     }
 
-    protected function getRateLimitedNotification(TooManyRequestsException $exception): ?Notification
-    {
-        return Notification::make()
-            ->title(__('filament-panels::auth/pages/email-verification/email-verification-prompt.notifications.notification_resend_throttled.title', [
-                'seconds' => $exception->secondsUntilAvailable,
-                'minutes' => $exception->minutesUntilAvailable,
-            ]))
-            ->body(array_key_exists('body', __('filament-panels::auth/pages/email-verification/email-verification-prompt.notifications.notification_resend_throttled') ?: []) ? __('filament-panels::auth/pages/email-verification/email-verification-prompt.notifications.notification_resend_throttled.body', [
-                'seconds' => $exception->secondsUntilAvailable,
-                'minutes' => $exception->minutesUntilAvailable,
-            ]) : null)
-            ->danger();
-    }
-
     public function resend(): void
     {
         try {
@@ -222,8 +236,27 @@ class VerificationPrompt extends EmailVerificationPrompt
         /** @var Notifiable $user */
         $user->notify($notification);
 
-        // $this->getSentNotification($status)?->send();
+        $this->getSentNotification()?->send();
 
         redirect(Filament::getCurrentPanel()->getEmailVerificationPromptUrl());
+    }
+
+    protected function getSentNotification(): ?Notification
+    {
+        switch (config('app.auth_type')) {
+            case AuthType::Mobile:
+                $title = 'fb-auth::fb-auth.verify.prompt.notification.mobile.title';
+                $body = 'fb-auth::fb-auth.verify.prompt.notification.mobile.body';
+                break;
+            case AuthType::Code:
+                $title = 'fb-auth::fb-auth.verify.prompt.notification.code.title';
+                $body = 'fb-auth::fb-auth.verify.prompt.notification.code.body';
+                break;
+        }
+
+        return Notification::make()
+            ->title(__($title))
+            ->body(__($body))
+            ->success();
     }
 }

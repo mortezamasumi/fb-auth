@@ -35,8 +35,7 @@ class FbAuth
 
         $identifire = match (config('app.auth_type')) {
             AuthType::Mobile => $user->mobile,
-            AuthType::Code,
-            AuthType::Link => $user->email,
+            AuthType::Code => $user->email,
             default => $user->id,
         };
 

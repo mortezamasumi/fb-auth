@@ -45,7 +45,7 @@ class Register extends BaseRegister
                     ->extraAttributes(['dir' => 'ltr'])
                     ->maxLength(255)
                     ->toEN()
-                    ->visible(config('app.auth_type') === AuthType::Link || config('app.auth_type') === AuthType::Link),
+                    ->visible(config('app.auth_type') === AuthType::Link || config('app.auth_type') === AuthType::Code),
                 TextInput::make('username')
                     ->label(__('fb-auth::fb-auth.form.username'))
                     ->required()
@@ -88,7 +88,7 @@ class Register extends BaseRegister
                 AuthType::Mobile => VerifyMobileNotification::class,
             },
             [
-                'code' => FbAuth::createCode($user)
+                'code' => FbAuth::createCode($user),
             ]
         );
 

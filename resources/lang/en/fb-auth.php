@@ -38,12 +38,16 @@ return [
         'title' => 'Profile updated successfully',
     ],
     'otp' => [
-        'resend-action' => 'Resend code',
-        'resend_in' => 'Resend code in:',
+        'verify_mobile_title' => 'Account verification by mobile',
+        'verify_code_title' => 'Account verification by email',
+        'resend_action' => 'Resend code',
         'validation' => 'Code is not correct',
         'expired' => 'Code has been expired, request to resend',
+        'mobile_label' => 'Enter the code sent to your number',
+        'code_label' => 'Enter the code sent to your email',
+        'prompt_action' => 'Verify',
     ],
-    'reset-password' => [
+    'reset_password' => [
         'request' => [
             'notification' => [
                 'mobile' => [
@@ -60,8 +64,8 @@ return [
                 'mobile' => 'Send sms',
             ]
         ],
-        'text-message' => ':app, Password reset code: :code',
-        'mail-message' => [
+        'text_message' => ':app, Password reset code: :code',
+        'mail_message' => [
             'subject' => 'Reset Password Notification',
             'greeting' => 'Hello!',
             'line1' => 'You are receiving this email containing code because we received a password reset request for your account.',
@@ -69,12 +73,27 @@ return [
             'action' => 'Reset Password',
             'timeout' => 'This code will expire in :count minutes.',
             'ending' => 'If you did not request a password reset, no further action is required.',
-            'salutation' => 'ًRegards,<br>:name',
+            'salutation' => 'Regards,<br>:name',
         ],
     ],
     'verify' => [
-        'text-message' => ':app, Password reset code: :code',
-        'mail-message' => [
+        'prompt' => [
+            'notification' => [
+                'mobile' => [
+                    'title' => 'SMS sent to given number',
+                    'body' => 'Password reset code sent by sms',
+                ],
+                'code' => [
+                    'title' => 'Email sent to given email',
+                    'body' => 'Password reset code sent by email',
+                ],
+            ],
+            'action' => [
+                'label' => 'Verify',
+            ]
+        ],
+        'text_message' => ':app, Password reset code: :code',
+        'mail_message' => [
             'subject' => 'Verify Email Address',
             'greeting' => 'Hello!',
             'line1' => 'You are receiving this email containing code because there is an account registered with this email.',
@@ -82,7 +101,7 @@ return [
             'action' => 'Verify Email Address',
             'timeout' => 'This code will expire in :count minutes.',
             'ending' => 'If you did not create an account, no further action is required.',
-            'salutation' => 'ًRegards,<br>:name',
+            'salutation' => 'Regards,<br>:name',
         ],
     ],
 ];
