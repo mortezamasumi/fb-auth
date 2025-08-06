@@ -23,7 +23,7 @@
         "php": "^8.2",
         "ariaieboy/filament-jalali": "^2.0",
         "filament/filament": "^4.0",
-        "mortezamasumi/sms": "^2.0|dev-main",
+        "mortezamasumi/fb-sms": "^4.0|dev-main",
         "spatie/laravel-package-tools": "^1.0"
     },
     "require-dev": {
@@ -72,7 +72,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/mortezamasumi/sms"
+            "url": "https://github.com/mortezamasumi/fb-sms"
         }
     ]
 }
