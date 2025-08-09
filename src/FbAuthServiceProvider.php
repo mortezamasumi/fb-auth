@@ -63,8 +63,8 @@ class FbAuthServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            Css::make('styles', __DIR__.'/../dist/assets/css/index.css'),
-            Js::make('scripts', __DIR__.'/../dist/assets/js/index.js'),
+            Css::make('fb-auth-styles', __DIR__.'/../resources/dist/css/index.css'),
+            Js::make('fb-auth-scripts', __DIR__.'/../resources/dist/js/index.js'),
         ];
     }
 }

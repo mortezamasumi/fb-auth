@@ -10,7 +10,7 @@ export default defineConfig({
         tailwindcss(),
     ],
     build: {
-        outDir: 'dist/assets',
+        outDir: 'resources/dist',
         emptyOutDir: true,
         rollupOptions: {
             output: {
