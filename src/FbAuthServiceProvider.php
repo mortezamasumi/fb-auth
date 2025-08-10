@@ -6,8 +6,9 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Livewire\Features\SupportTesting\Testable;
-use Mortezamasumi\FbAuth\FbAuth;
 use Mortezamasumi\FbAuth\Testing\TestsFbAuth;
+use Mortezamasumi\FbAuth\FbAuth;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -19,6 +20,11 @@ class FbAuthServiceProvider extends PackageServiceProvider
     {
         $package
             ->name(static::$name)
+            ->hasInstallCommand(function (InstallCommand $command) {
+                $command
+                    ->publishConfigFile()
+                    ->publishAssets();
+            })
             ->hasTranslations()
             ->hasConfigFile()
             ->hasViews();
