@@ -116,7 +116,7 @@ class ResetPassword extends BaseResetPassword
      */
     protected function getCredentialsFromFormData(array $data): array
     {
-        switch (config('app.auth_type')) {
+        switch (config('fb-auth.auth_type')) {
             case AuthType::Mobile:
                 unset($data['email']);
                 break;
@@ -143,7 +143,7 @@ class ResetPassword extends BaseResetPassword
     protected function getOTPFormComponent(): Component
     {
         return TextInput::make('otp')
-            ->label(__(match (config('app.auth_type')) {
+            ->label(__(match (config('fb-auth.auth_type')) {
                 AuthType::Mobile => 'fb-auth::fb-auth.otp.mobile_label',
                 AuthType::Code => 'fb-auth::fb-auth.otp.code_label',
             }))
@@ -152,7 +152,7 @@ class ResetPassword extends BaseResetPassword
             ->autofocus()
             ->rules([
                 fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                    [$code, $time] = Cache::get('otp-'.match (config('app.auth_type')) {
+                    [$code, $time] = Cache::get('otp-'.match (config('fb-auth.auth_type')) {
                         AuthType::Mobile => $this->mobile,
                         AuthType::Code => $this->email,
                     });
@@ -205,7 +205,7 @@ class ResetPassword extends BaseResetPassword
                 }
 
                 $notification = app(
-                    match (config('app.auth_type')) {
+                    match (config('fb-auth.auth_type')) {
                         AuthType::Code => PasswordResetCodeNotification::class,
                         AuthType::Mobile => PasswordResetMobileNotification::class,
                     },
@@ -250,7 +250,7 @@ class ResetPassword extends BaseResetPassword
 
     protected function getSentNotification(string $status): ?Notification
     {
-        switch (config('app.auth_type')) {
+        switch (config('fb-auth.auth_type')) {
             case AuthType::Mobile:
                 $title = 'fb-auth::fb-auth.reset_password.request.notification.mobile.title';
                 $body = 'fb-auth::fb-auth.reset_password.request.notification.mobile.body';

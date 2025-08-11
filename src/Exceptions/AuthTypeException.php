@@ -6,5 +6,5 @@ use Exception;
 
 class AuthTypeException extends Exception
 {
-    protected $message = 'Only and required one of link/code/mobile auth types to be selected';
+    protected $message = 'Invalid auth type or not specified';
 }

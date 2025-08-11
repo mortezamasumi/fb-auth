@@ -33,7 +33,7 @@ class FbAuth
     {
         $code = $this->generateRandomCode();
 
-        $identifire = match (config('app.auth_type')) {
+        $identifire = match (config('fb-auth.auth_type')) {
             AuthType::Mobile => $user->mobile,
             AuthType::Code => $user->email,
             default => $user->id,

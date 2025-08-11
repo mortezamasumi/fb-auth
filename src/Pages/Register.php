@@ -37,7 +37,7 @@ class Register extends BaseRegister
                     ->telRegex('/^((\+|00)[1-9][0-9 \-\(\)\.]{11,18}|09\d{9})$/')
                     ->maxLength(30)
                     ->toEN()
-                    ->visible(config('app.auth_type') === AuthType::Mobile),
+                    ->visible(config('fb-auth.auth_type') === AuthType::Mobile),
                 TextInput::make('email')
                     ->label(__('filament-panels::auth/pages/register.form.email.label'))
                     ->required()
@@ -45,12 +45,12 @@ class Register extends BaseRegister
                     ->extraAttributes(['dir' => 'ltr'])
                     ->maxLength(255)
                     ->toEN()
-                    ->visible(config('app.auth_type') === AuthType::Link || config('app.auth_type') === AuthType::Code),
+                    ->visible(config('fb-auth.auth_type') === AuthType::Link || config('fb-auth.auth_type') === AuthType::Code),
                 TextInput::make('username')
                     ->label(__('fb-auth::fb-auth.form.username'))
                     ->required()
                     ->maxLength(255)
-                    ->visible(config('app.auth_type') === AuthType::User),
+                    ->visible(config('fb-auth.auth_type') === AuthType::User),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
@@ -66,11 +66,11 @@ class Register extends BaseRegister
             return;
         }
 
-        if (config('app.auth_type') === AuthType::User) {
+        if (config('fb-auth.auth_type') === AuthType::User) {
             return;
         }
 
-        if (config('app.auth_type') === AuthType::Link) {
+        if (config('fb-auth.auth_type') === AuthType::Link) {
             parent::sendEmailVerificationNotification($user);
 
             return;
@@ -83,7 +83,7 @@ class Register extends BaseRegister
         }
 
         $notification = app(
-            match (config('app.auth_type')) {
+            match (config('fb-auth.auth_type')) {
                 AuthType::Code => VerifyCodeNotification::class,
                 AuthType::Mobile => VerifyMobileNotification::class,
             },

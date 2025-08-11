@@ -5,13 +5,11 @@ namespace Mortezamasumi\FbAuth;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Mortezamasumi\FbAuth\Enums\AuthType;
-use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
 use Mortezamasumi\FbAuth\Pages\Login;
 use Mortezamasumi\FbAuth\Pages\Register;
 use Mortezamasumi\FbAuth\Pages\RequestPasswordReset;
 use Mortezamasumi\FbAuth\Pages\ResetPassword;
 use Mortezamasumi\FbAuth\Pages\VerificationPrompt;
-use Exception;
 
 class FbAuthPlugin implements Plugin
 {
@@ -22,10 +20,6 @@ class FbAuthPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $this->checkConfig();
-
-        $this->registerAuthType();
-
         if ($panel->hasLogin()) {
             $panel->login(Login::class);
         }
@@ -34,7 +28,7 @@ class FbAuthPlugin implements Plugin
             $panel->registration(Register::class);
         }
 
-        switch (config('app.auth_type')) {
+        switch (config('fb-auth.auth_type')) {
             case AuthType::Link:
                 if ($panel->hasEmailVerification()) {
                     $panel->emailChangeVerification();
@@ -57,37 +51,6 @@ class FbAuthPlugin implements Plugin
                 }
                 break;
         }
-    }
-
-    protected function registerAuthType(): void
-    {
-        if (config('fb-auth.email_required')) {
-            if (config('fb-auth.email_link_verification')) {
-                config(['app.auth_type' => AuthType::Link]);
-            } else {
-                config(['app.auth_type' => AuthType::Code]);
-            }
-        } else {
-            if (config('fb-auth.email_link_verification')) {
-                throw new Exception('Can not use link while auth type are mobile/username');
-            }
-
-            if (config('fb-auth.mobile_required')) {
-                config(['app.auth_type' => AuthType::Mobile]);
-            } else {
-                config(['app.auth_type' => AuthType::User]);
-            }
-        }
-    }
-
-    protected function checkConfig(): void
-    {
-        $trueCount = collect(config('fb-auth'))
-            ->only(['mobile_required', 'email_required', 'username_required'])
-            ->filter()
-            ->count();
-
-        throw_unless($trueCount === 1, new AuthTypeException());
     }
 
     public function boot(Panel $panel): void

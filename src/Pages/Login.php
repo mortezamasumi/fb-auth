@@ -17,13 +17,16 @@ class Login extends BaseLogin
             ->components([
                 $this
                     ->getMobileFormComponent()
-                    ->visible(config('app.auth_type') === AuthType::Mobile),
+                    ->visible(config('fb-auth.auth_type') === AuthType::Mobile),
                 $this
                     ->getUsernameFormComponent()
-                    ->visible(config('app.auth_type') === AuthType::User),
+                    ->visible(config('fb-auth.auth_type') === AuthType::User),
                 $this
                     ->getEmailFormComponent()
-                    ->visible(config('app.auth_type') === AuthType::Code || config('app.auth_type') === AuthType::Link),
+                    ->visible(
+                        config('fb-auth.auth_type') === AuthType::Code ||
+                        config('fb-auth.auth_type') === AuthType::Link
+                    ),
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
             ]);
@@ -54,7 +57,7 @@ class Login extends BaseLogin
      */
     protected function getCredentialsFromFormData(array $data): array
     {
-        $key = match (config('app.auth_type')) {
+        $key = match (config('fb-auth.auth_type')) {
             AuthType::Mobile => 'mobile',
             AuthType::Code => 'email',
             AuthType::Link => 'email',
@@ -69,7 +72,7 @@ class Login extends BaseLogin
 
     protected function throwFailureValidationException(): never
     {
-        $key = match (config('app.auth_type')) {
+        $key = match (config('fb-auth.auth_type')) {
             AuthType::Mobile => 'mobile',
             AuthType::Code => 'email',
             AuthType::Link => 'email',

@@ -2,7 +2,7 @@
     use Filament\Support\View\Components\LinkComponent;
     use Mortezamasumi\FbAuth\Enums\AuthType;
 
-    $identifire = match (config('app.auth_type')) {
+    $identifire = match (config('fb-auth.auth_type')) {
         AuthType::Mobile => $this->mobile,
         AuthType::Code => $this->email,
     };

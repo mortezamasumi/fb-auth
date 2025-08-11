@@ -4,8 +4,8 @@ namespace Mortezamasumi\FbAuth\Enums;
 
 enum AuthType: string
 {
-    case User = 'username';
-    case Code = 'email-code';
-    case Mobile = 'mobile-code';
-    case Link = 'email-link';
+    case User = 'user';
+    case Code = 'code';
+    case Mobile = 'mobile';
+    case Link = 'link';
 }

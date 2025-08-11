@@ -80,7 +80,7 @@ class VerificationPrompt extends EmailVerificationPrompt
     protected function getOTPFormComponent(): Component
     {
         return TextInput::make('otp')
-            ->label(__(match (config('app.auth_type')) {
+            ->label(__(match (config('fb-auth.auth_type')) {
                 AuthType::Mobile => 'fb-auth::fb-auth.otp.mobile_label',
                 AuthType::Code => 'fb-auth::fb-auth.otp.code_label',
             }))
@@ -90,7 +90,7 @@ class VerificationPrompt extends EmailVerificationPrompt
             ->autofocus()
             ->rules([
                 fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                    [$code, $time] = Cache::get('otp-'.match (config('app.auth_type')) {
+                    [$code, $time] = Cache::get('otp-'.match (config('fb-auth.auth_type')) {
                         AuthType::Mobile => $this->mobile,
                         AuthType::Code => $this->email,
                     });
@@ -135,7 +135,7 @@ class VerificationPrompt extends EmailVerificationPrompt
 
     public function getTitle(): string|Htmlable
     {
-        return __(match (config('app.auth_type')) {
+        return __(match (config('fb-auth.auth_type')) {
             AuthType::Mobile => 'fb-auth::fb-auth.otp.verify_mobile_title',
             AuthType::Code => 'fb-auth::fb-auth.otp.verify_code_title',
         });
@@ -143,7 +143,7 @@ class VerificationPrompt extends EmailVerificationPrompt
 
     public function getHeading(): string|Htmlable
     {
-        return __(match (config('app.auth_type')) {
+        return __(match (config('fb-auth.auth_type')) {
             AuthType::Mobile => 'fb-auth::fb-auth.otp.verify_mobile_title',
             AuthType::Code => 'fb-auth::fb-auth.otp.verify_code_title',
         });
@@ -224,7 +224,7 @@ class VerificationPrompt extends EmailVerificationPrompt
         }
 
         $notification = app(
-            match (config('app.auth_type')) {
+            match (config('fb-auth.auth_type')) {
                 AuthType::Code => VerifyCodeNotification::class,
                 AuthType::Mobile => VerifyMobileNotification::class,
             },
@@ -243,7 +243,7 @@ class VerificationPrompt extends EmailVerificationPrompt
 
     protected function getSentNotification(): ?Notification
     {
-        switch (config('app.auth_type')) {
+        switch (config('fb-auth.auth_type')) {
             case AuthType::Mobile:
                 $title = 'fb-auth::fb-auth.verify.prompt.notification.mobile.title';
                 $body = 'fb-auth::fb-auth.verify.prompt.notification.mobile.body';

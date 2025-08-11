@@ -6,8 +6,10 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Livewire\Features\SupportTesting\Testable;
-use Mortezamasumi\FbAuth\Testing\TestsFbAuth;
+use Mortezamasumi\FbAuth\Enums\AuthType;
+use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
 use Mortezamasumi\FbAuth\FbAuth;
+use Mortezamasumi\FbAuth\Testing\TestsFbAuth;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -33,6 +35,10 @@ class FbAuthServiceProvider extends PackageServiceProvider
     public function packageRegistered()
     {
         $this->app->singleton('FbAuth', fn ($app) => new FbAuth());
+
+        config(['fb-auth.auth_type' => AuthType::tryFrom(config('fb-auth.auth_type'))]);
+
+        throw_unless(config('fb-auth.auth_type'), new AuthTypeException());
     }
 
     public function packageBooted(): void

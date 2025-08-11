@@ -32,7 +32,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                     ->telRegex('/^((\+|00)[1-9][0-9 \-\(\)\.]{11,18}|09\d{9})$/')
                     ->maxLength(30)
                     ->toEN()
-                    ->visible(config('app.auth_type') === AuthType::Mobile),
+                    ->visible(config('fb-auth.auth_type') === AuthType::Mobile),
                 TextInput::make('email')
                     ->label(__('filament-panels::auth/pages/register.form.email.label'))
                     ->required()
@@ -40,7 +40,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                     ->extraAttributes(['dir' => 'ltr'])
                     ->maxLength(255)
                     ->toEN()
-                    ->hidden(config('app.auth_type') === AuthType::Mobile),
+                    ->hidden(config('fb-auth.auth_type') === AuthType::Mobile),
             ]);
     }
 
@@ -48,7 +48,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
     {
         return Action::make('request')
             ->label(__(
-                config('app.auth_type') === AuthType::Mobile
+                config('fb-auth.auth_type') === AuthType::Mobile
                     ? 'fb-auth::fb-auth.reset_password.request.action.mobile'
                     : 'fb-auth::fb-auth.reset_password.request.action.email'
             ))
@@ -84,7 +84,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                 }
 
                 $notification = app(
-                    match (config('app.auth_type')) {
+                    match (config('fb-auth.auth_type')) {
                         AuthType::Code => PasswordResetCodeNotification::class,
                         AuthType::Mobile => PasswordResetMobileNotification::class,
                     },
@@ -97,7 +97,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                 $notification->url = Filament::getResetPasswordUrl(
                     $token,
                     $user,
-                    match (config('app.auth_type')) {
+                    match (config('fb-auth.auth_type')) {
                         AuthType::Code => [],
                         AuthType::Mobile => ['mobile' => $user->mobile],
                     }
@@ -129,7 +129,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
      */
     protected function getCredentialsFromFormData(array $data): array
     {
-        return match (config('app.auth_type')) {
+        return match (config('fb-auth.auth_type')) {
             AuthType::Code => ['email' => $data['email']],
             AuthType::Mobile => ['mobile' => $data['mobile']],
         };
@@ -137,7 +137,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
     protected function getSentNotification(string $status): ?Notification
     {
-        switch (config('app.auth_type')) {
+        switch (config('fb-auth.auth_type')) {
             case AuthType::Mobile:
                 $title = 'fb-auth::fb-auth.reset_password.request.notification.mobile.title';
                 $body = 'fb-auth::fb-auth.reset_password.request.notification.mobile.body';
