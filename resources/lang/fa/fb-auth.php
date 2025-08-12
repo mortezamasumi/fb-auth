@@ -28,7 +28,7 @@ return [
         'user_profile' => 'پروفایل',
         'account' => 'حساب‌کاربری',
         'password' => 'رمز‌عبور',
-        'expired_at' => 'تاریخ‌انقضای‌حساب',
+        'expiration_date' => 'تاریخ‌انقضای‌حساب',
         'force_change_password' => 'اجبار‌به‌تغییر‌رمز',
         'profile' => [
             'father_name' => 'نام‌پدر',
@@ -36,6 +36,9 @@ return [
     ],
     'notification' => [
         'title' => 'پروفایل با موفقیت بروزرسانی شد',
+    ],
+    'expiration' => [
+        'message' => 'این حساب‌کاربری منقضی شده است. لطفا با پشتیبانی تماس بگیرید.',
     ],
     'otp' => [
         'resend_code' => 'ارسال مجدد کد',
