@@ -31,7 +31,7 @@ class FbAuthPlugin implements Plugin
         switch (config('fb-auth.auth_type')) {
             case AuthType::Link:
                 if ($panel->hasEmailVerification()) {
-                    $panel->emailChangeVerification();
+                    $panel->emailChangeVerification(false);
                 }
                 break;
 
@@ -47,7 +47,9 @@ class FbAuthPlugin implements Plugin
                 }
 
                 if ($panel->hasEmailVerification()) {
-                    $panel->emailVerification(VerificationPrompt::class);
+                    $panel
+                        ->emailVerification(VerificationPrompt::class)
+                        ->emailChangeVerification(false);
                 }
                 break;
         }
