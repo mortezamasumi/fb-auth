@@ -36,7 +36,9 @@ class FbAuthServiceProvider extends PackageServiceProvider
     {
         $this->app->singleton('FbAuth', fn ($app) => new FbAuth());
 
-        config(['fb-auth.auth_type' => AuthType::tryFrom(config('fb-auth.auth_type'))]);
+        if (! (config('fb-auth.auth_type') instanceof AuthType)) {
+            config(['fb-auth.auth_type' => AuthType::tryFrom(config('fb-auth.auth_type'))]);
+        }
 
         throw_unless(config('fb-auth.auth_type'), new AuthTypeException());
     }
