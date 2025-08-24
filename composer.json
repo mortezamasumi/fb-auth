@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "ariaieboy/filament-jalali": "^2.0",
         "filament/filament": "^4.0",
         "mortezamasumi/fb-sms": "^4.0|dev-main",
