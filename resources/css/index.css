@@ -1,4 +1,7 @@
-@import 'tailwindcss';
+@import '../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../resources/view/**/*.blade.php';
+@source '../../src/**/*.php';
 
 .otp-wrapper {
     @apply space-y-2;
@@ -11,11 +14,23 @@
 }
 
 .otp-cell {
-    @apply px-0 py-2 mx-auto my-2 w-80 text-center;
-    @apply p-4 w-24 h-14 text-3xl font-extrabold text-center rounded-md border border-transparent;
-    @apply appearance-none outline-none focus:ring-2;
-    /* @apply dark:text-slate-200 dark:bg-slate-700 dark:hover:border-slate-500;
-        @apply text-slate-900 bg-slate-300 hover:bg-slate-400;
-        @apply focus:bg-slate-200 focus:border-indigo-400  focus:ring-indigo-100;
-        @apply dark:focus:bg-slate-500 dark:focus:border-indigo-800 dark:focus:ring-indigo-700; */
+    @apply p-4 w-24 h-14 mx-auto my-2 text-3xl font-extrabold text-center rounded-md border border-transparent appearance-none outline-none;
+
+    @apply text-slate-900 bg-slate-300 hover:bg-slate-400;
+    @apply focus:bg-slate-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100;
+
+    @apply dark:text-slate-200 dark:bg-slate-700 dark:hover:border-slate-500;
+    @apply dark:focus:bg-slate-500 dark:focus:border-indigo-800 dark:focus:ring-indigo-700;
+}
+
+.otp-resend-wrapper {
+    @apply grid gap-y-4 text-center;
+}
+
+.otp-resend {
+    @apply text-sm font-medium cursor-pointer;
+}
+
+.otp-counter {
+    @apply space-x-1 text-sm font-medium opacity-45 flex justify-between;
 }

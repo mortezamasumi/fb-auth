@@ -20,17 +20,18 @@
     if ($remainingTime <= 0) {
         $remainingTime = 0;
     }
+
+    $locale = app()->getLocale();
 @endphp
 
-<div class="grid gap-y-4 text-center" x-data="otpResend({{ $remainingTime }}, '{{ app()->getLocale() }}')" x-init="init()">
+<div class="otp-resend-wrapper" x-data="otpResend({{ $remainingTime }}, '{{ $locale }}')" x-init="init()">
     <template x-if="getTime() <= 0">
-        <x-filament::link wire:click="{{ $action->getLivewireClickHandler() }}"
-            class="filament-hint-action text-sm font-medium cursor-pointer">
+        <x-filament::link wire:click="{{ $action->getLivewireClickHandler() }}" class="filament-hint-action  otp-resend">
             {{ $action->getLabel() }}
         </x-filament::link>
     </template>
     <template x-if="getTime() > 0">
-        <div class="space-x-1 text-sm font-medium opacity-45 flex justify-between" x-text="formatTime(getTime())">
+        <div class="otp-counter" x-text="formatTime(getTime())">
         </div>
     </template>
 </div>
