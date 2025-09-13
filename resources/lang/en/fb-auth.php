@@ -68,7 +68,7 @@ return [
                 'label' => 'Verify',
             ]
         ],
-        'text_message' => ':app, Password reset code: :code',
+        'text_message' => ':app, Verify account code: :code',
         'mail_message' => [
             'subject' => 'Verify Email Address',
             'greeting' => 'Hello!',
