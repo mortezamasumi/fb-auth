@@ -16,6 +16,11 @@ class VerifyMobileNotification extends Notification implements ShouldQueue
         protected string $code,
     ) {}
 
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
     public function via($notifiable)
     {
         return ['sms'];

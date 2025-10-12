@@ -14,6 +14,11 @@ class VerifyCodeNotification extends VerifyEmail
         $this->url = '/';
     }
 
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
     protected function buildMailMessage($url)
     {
         return (new MailMessage)

@@ -23,6 +23,7 @@
         "php": "^8.3",
         "ariaieboy/filament-jalali": "^2.0",
         "filament/filament": "^4.0",
+        "mortezamasumi/fb-essentials": "^4.0|dev-main",
         "mortezamasumi/fb-sms": "^4.0|dev-main",
         "spatie/laravel-package-tools": "^1.0"
     },

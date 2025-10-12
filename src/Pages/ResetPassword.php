@@ -2,7 +2,9 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
+use Closure;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
@@ -26,8 +28,6 @@ use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
-use Closure;
-use Exception;
 
 class ResetPassword extends BaseResetPassword
 {
@@ -170,7 +170,7 @@ class ResetPassword extends BaseResetPassword
                 Action::make('resend-code')
                     ->label(__('fb-auth::fb-auth.otp.resend_action'))
                     ->view('fb-auth::resend-action')
-                    ->action(fn ($state) => $this->resend())
+                    ->action(fn () => $this->resend())
             );
     }
 

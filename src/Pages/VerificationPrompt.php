@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
@@ -59,6 +60,8 @@ class VerificationPrompt extends EmailVerificationPrompt
         $this->form->getState();
 
         $this->getVerifiable()->markEmailAsVerified();
+
+        event(new Verified($this->getVerifiable()));
 
         redirect(Filament::getUrl());
     }
@@ -238,7 +241,7 @@ class VerificationPrompt extends EmailVerificationPrompt
 
         $this->getSentNotification()?->send();
 
-        redirect(Filament::getCurrentPanel()->getEmailVerificationPromptUrl());
+        redirect(Filament::getEmailVerificationPromptUrl());
     }
 
     protected function getSentNotification(): ?Notification
