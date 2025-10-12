@@ -8,11 +8,9 @@ use Filament\Panel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
-use Mortezamasumi\FbAuth\Enums\AuthType;
+use Mortezamasumi\FbAuth\Tests\Services\User;
 use Mortezamasumi\FbAuth\FbAuthPlugin;
 use Mortezamasumi\FbAuth\FbAuthServiceProvider;
-use Mortezamasumi\FbAuth\Tests\Services\User;
-use Mortezamasumi\FbEssentials\FbEssentialsPlugin;
 use Mortezamasumi\FbEssentials\FbEssentialsServiceProvider;
 use Mortezamasumi\FbSms\FbSmsServiceProvider;
 use Orchestra\Testbench\TestCase as TestbenchTestCase;
@@ -55,20 +53,6 @@ class TestCase extends TestbenchTestCase
                 ->passwordReset()
                 ->pages([
                     Dashboard::class,
-                ])
-                ->middleware([
-                    \Illuminate\Cookie\Middleware\EncryptCookies::class,
-                    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-                    \Illuminate\Session\Middleware\StartSession::class,
-                    \Filament\Http\Middleware\AuthenticateSession::class,
-                    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-                    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
-                    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-                    \Filament\Http\Middleware\DisableBladeIconComponents::class,
-                    \Filament\Http\Middleware\DispatchServingFilamentEvent::class,
-                ])
-                ->authMiddleware([
-                    \Filament\Http\Middleware\Authenticate::class,
                 ])
                 ->plugins([
                     FbAuthPlugin::make(),
