@@ -21,8 +21,6 @@ class TestCase extends TestbenchTestCase
 
     protected function defineEnvironment($app)
     {
-        $app['config']->set('auth.providers.users.model', User::class);
-
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
