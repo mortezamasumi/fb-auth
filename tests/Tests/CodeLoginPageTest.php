@@ -51,3 +51,18 @@ it('can get validation error on no exists user', function () {
             ['email' => __('filament-panels::auth/pages/login.messages.failed')]
         );
 });
+
+it('can get validation error on expired user', function () {
+    $user = User::factory()->expired()->create();
+
+    $this
+        ->livewire(Login::class)
+        ->fillForm([
+            'email' => $user->email,
+            'password' => 'password',
+        ])
+        ->call('authenticate')
+        ->assertHasFormErrors(
+            ['email' => __('fb-auth::fb-auth.expiration.message')]
+        );
+});

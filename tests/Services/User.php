@@ -19,6 +19,7 @@ class User extends Authenticatable implements FilamentUser, HasName, MustVerifyE
     use Notifiable;
 
     protected $guarded = [];
+    protected $casts = ['expiration_date' => 'datetime'];
 
     public function canAccessPanel(Panel $panel): bool
     {

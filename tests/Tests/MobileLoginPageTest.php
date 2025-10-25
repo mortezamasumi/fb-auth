@@ -64,3 +64,18 @@ it('can get validation error on invalid mobile format', function () {
             ['mobile' => 'The mobile field format is invalid.']
         );
 });
+
+it('can get validation error on expired user', function () {
+    $user = User::factory()->expired()->create();
+
+    $this
+        ->livewire(Login::class)
+        ->fillForm([
+            'mobile' => $user->mobile,
+            'password' => 'password',
+        ])
+        ->call('authenticate')
+        ->assertHasFormErrors(
+            ['mobile' => __('fb-auth::fb-auth.expiration.message')]
+        );
+});

@@ -29,6 +29,7 @@ class TestCase extends TestbenchTestCase
             $table->string('email')->unique()->nullable();
             $table->string('mobile')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('expiration_date')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
