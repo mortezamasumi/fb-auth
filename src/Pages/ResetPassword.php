@@ -2,9 +2,7 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
-use Closure;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
@@ -28,6 +26,8 @@ use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
+use Closure;
+use Exception;
 
 class ResetPassword extends BaseResetPassword
 {
@@ -73,7 +73,7 @@ class ResetPassword extends BaseResetPassword
             function (CanResetPassword|Model|Authenticatable $user) use ($data, &$hasPanelAccess): void {
                 if (
                     ($user instanceof FilamentUser) &&
-                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                    (!$user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
                 ) {
                     $hasPanelAccess = false;
 
@@ -148,16 +148,17 @@ class ResetPassword extends BaseResetPassword
                 AuthType::Code => 'fb-auth::fb-auth.otp.code_label',
             }))
             ->required()
+            ->view('fb-auth::otp-input')
             ->autocomplete()
             ->autofocus()
             ->rules([
-                fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                    [$code, $time] = Cache::get('otp-'.match (config('fb-auth.auth_type')) {
+                fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                    [$code, $time] = Cache::get('otp-' . match (config('fb-auth.auth_type')) {
                         AuthType::Mobile => $this->mobile,
                         AuthType::Code => $this->email,
                     });
 
-                    if (! $code) {
+                    if (!$code) {
                         $fail(__('fb-auth::fb-auth.otp.expired'));
                     }
 
@@ -170,7 +171,7 @@ class ResetPassword extends BaseResetPassword
                 Action::make('resend-code')
                     ->label(__('fb-auth::fb-auth.otp.resend_action'))
                     ->view('fb-auth::resend-action')
-                    ->action(fn () => $this->resend())
+                    ->action(fn() => $this->resend())
             );
     }
 
@@ -193,12 +194,12 @@ class ResetPassword extends BaseResetPassword
             function (CanResetPassword $user, string $token) use (&$notification): void {
                 if (
                     ($user instanceof FilamentUser) &&
-                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                    (!$user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
                 ) {
                     return;
                 }
 
-                if (! method_exists($user, 'notify')) {
+                if (!method_exists($user, 'notify')) {
                     $userClass = $user::class;
 
                     throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
