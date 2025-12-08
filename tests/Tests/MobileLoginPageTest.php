@@ -79,3 +79,18 @@ it('can get validation error on expired user', function () {
             ['mobile' => __('fb-auth::fb-auth.expiration.message')]
         );
 });
+
+it('can get validation error on not active user', function () {
+    $user = User::factory()->noActive()->create();
+
+    $this
+        ->livewire(Login::class)
+        ->fillForm([
+            'mobile' => $user->mobile,
+            'password' => 'password',
+        ])
+        ->call('authenticate')
+        ->assertHasFormErrors(
+            ['mobile' => __('fb-auth::fb-auth.expiration.message')]
+        );
+});

@@ -50,6 +50,30 @@ it('can redirect on request', function () {
         ->assertSuccessful();
 });
 
+it('can get error on expired user', function () {
+    $user = User::factory()->expired()->create();
+
+    $this
+        ->livewire(RequestPasswordReset::class)
+        ->fillForm(['email' => $user->email])
+        ->call('request')
+        ->assertHasFormErrors(
+            ['email' => __('filament-panels::auth/pages/login.messages.failed')]
+        );
+});
+
+it('can get error on inactive user', function () {
+    $user = User::factory()->noActive()->create();
+
+    $this
+        ->livewire(RequestPasswordReset::class)
+        ->fillForm(['email' => $user->email])
+        ->call('request')
+        ->assertHasFormErrors(
+            ['email' => __('filament-panels::auth/pages/login.messages.failed')]
+        );
+});
+
 it('can send the password change email', function () {
     Notification::fake();
     Event::fake();

@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 
@@ -98,7 +99,7 @@ class Login extends BaseLogin
 
         $user = $authProvider->retrieveByCredentials($credentials);
 
-        if ((! $user) || (! $authProvider->validateCredentials($user, $credentials))) {
+        if ((!$user) || (!$authProvider->validateCredentials($user, $credentials))) {
             $this->userUndertakingMultiFactorAuthentication = null;
 
             $this->fireFailedEvent($authGuard, $user, $credentials);
@@ -112,7 +113,7 @@ class Login extends BaseLogin
             $this->multiFactorChallengeForm->validate();
         } else {
             foreach (Filament::getMultiFactorAuthenticationProviders() as $multiFactorAuthenticationProvider) {
-                if (! $multiFactorAuthenticationProvider->isEnabled($user)) {
+                if (!$multiFactorAuthenticationProvider->isEnabled($user)) {
                     continue;
                 }
 
@@ -133,8 +134,8 @@ class Login extends BaseLogin
         }
 
         if (
-            ! $authGuard->attemptWhen($credentials, function (Authenticatable $user): bool {
-                if (! ($user instanceof FilamentUser)) {
+            !$authGuard->attemptWhen($credentials, function (Authenticatable $user): bool {
+                if (!($user instanceof FilamentUser)) {
                     return true;
                 }
 
@@ -145,13 +146,14 @@ class Login extends BaseLogin
             $this->throwFailureValidationException();
         }
 
-        if ($user->expiration_date && $user->expiration_date->isPast()) {
+        if ((!$user->active) || ($user->expiration_date && $user->expiration_date->isPast())) {
             Filament::auth()->logout();
 
+            $this->fireFailedEvent($authGuard, $user, $credentials);
             $this->throwFailureExpirationException();
         }
 
-        session()->regenerate();
+        Session::regenerate();
 
         return app(LoginResponse::class);
     }
@@ -166,7 +168,7 @@ class Login extends BaseLogin
         };
 
         throw ValidationException::withMessages([
-            'data.'.$key => __('filament-panels::auth/pages/login.messages.failed'),
+            'data.' . $key => __('filament-panels::auth/pages/login.messages.failed'),
         ]);
     }
 
@@ -180,7 +182,7 @@ class Login extends BaseLogin
         };
 
         throw ValidationException::withMessages([
-            'data.'.$key => __('fb-auth::fb-auth.expiration.message'),
+            'data.' . $key => __('fb-auth::fb-auth.expiration.message'),
         ]);
     }
 }

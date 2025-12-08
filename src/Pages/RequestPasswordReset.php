@@ -12,11 +12,14 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
+use Closure;
 use Exception;
 
 class RequestPasswordReset extends BaseRequestPasswordReset
@@ -29,6 +32,25 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                     ->label(__('fb-auth::fb-auth.form.mobile'))
                     ->required()
                     ->tel()
+                    ->rules([
+                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                            /** @disregard */
+                            $userModel = Auth::getProvider()->getModel();
+
+                            $user = $userModel::where('mobile', $value)
+                                ->where('active', true)
+                                ->where(function (Builder $query) {
+                                    $query
+                                        ->whereDate('expiration_date', '>', now())
+                                        ->orWhere('expiration_date', null);
+                                })
+                                ->first();
+
+                            if (!$user) {
+                                $fail(__('filament-panels::auth/pages/login.messages.failed'));
+                            }
+                        }
+                    ])
                     ->telRegex('/^((\+|00)[1-9][0-9 \-\(\)\.]{11,18}|09\d{9})$/')
                     ->maxLength(30)
                     ->toEN()
@@ -36,7 +58,26 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                 TextInput::make('email')
                     ->label(__('filament-panels::auth/pages/register.form.email.label'))
                     ->required()
-                    ->rules(['email'])
+                    ->rules([
+                        'email',
+                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                            /** @disregard */
+                            $userModel = Auth::getProvider()->getModel();
+
+                            $user = $userModel::where('email', $value)
+                                ->where('active', true)
+                                ->where(function (Builder $query) {
+                                    $query
+                                        ->whereDate('expiration_date', '>', now())
+                                        ->orWhere('expiration_date', null);
+                                })
+                                ->first();
+
+                            if (!$user) {
+                                $fail(__('filament-panels::auth/pages/login.messages.failed'));
+                            }
+                        }
+                    ])
                     ->extraAttributes(['dir' => 'ltr'])
                     ->maxLength(255)
                     ->toEN()
@@ -72,12 +113,12 @@ class RequestPasswordReset extends BaseRequestPasswordReset
             function (CanResetPassword $user, string $token) use (&$notification): void {
                 if (
                     ($user instanceof FilamentUser) &&
-                    (! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                    (!$user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
                 ) {
                     return;
                 }
 
-                if (! method_exists($user, 'notify')) {
+                if (!method_exists($user, 'notify')) {
                     $userClass = $user::class;
 
                     throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
@@ -120,6 +161,7 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
         $this->getSentNotification($status)?->send();
 
+        /** @var PasswordResetCodeNotification|PasswordResetMobileNotification $notification */
         redirect($notification->url);
     }
 
