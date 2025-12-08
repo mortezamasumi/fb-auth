@@ -63,7 +63,8 @@ it('can get validation error on expired user', function () {
         ])
         ->call('authenticate')
         ->assertHasFormErrors(
-            ['email' => __('fb-auth::fb-auth.expiration.message')]
+            ['email' => __('filament-panels::auth/pages/login.messages.failed')]
+            // ['email' => __('fb-auth::fb-auth.expiration.message')]
         );
 });
 
@@ -78,6 +79,7 @@ it('can get validation error on not active user', function () {
         ])
         ->call('authenticate')
         ->assertHasFormErrors(
-            ['email' => __('fb-auth::fb-auth.expiration.message')]
+            ['email' => __('filament-panels::auth/pages/login.messages.failed')]
+            // ['email' => __('fb-auth::fb-auth.expiration.message')]
         );
 });

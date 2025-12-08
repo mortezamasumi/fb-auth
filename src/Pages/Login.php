@@ -182,7 +182,8 @@ class Login extends BaseLogin
         };
 
         throw ValidationException::withMessages([
-            'data.' . $key => __('fb-auth::fb-auth.expiration.message'),
+            'data.' . $key => __('filament-panels::auth/pages/login.messages.failed'),
+            // 'data.' . $key => __('fb-auth::fb-auth.expiration.message'),
         ]);
     }
 }
