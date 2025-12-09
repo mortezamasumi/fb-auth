@@ -16,6 +16,7 @@ beforeEach(function () {
 });
 
 it('can redirect from login page to request page', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->assertSeeText(__('filament-panels::auth/pages/login.actions.request_password_reset.label'))
@@ -23,12 +24,14 @@ it('can redirect from login page to request page', function () {
 });
 
 it('can render request page', function () {
+    /** @var Pest $this */
     $this
         ->livewire(RequestPasswordReset::class)
         ->assertSuccessful();
 });
 
 it('can get validation error', function () {
+    /** @var Pest $this */
     $this
         ->livewire(RequestPasswordReset::class)
         ->call('request')
@@ -40,6 +43,7 @@ it('can get validation error', function () {
 it('can redirect on request', function () {
     $user = User::factory()->create();
 
+    /** @var Pest $this */
     $this
         ->livewire(RequestPasswordReset::class)
         ->fillForm(['email' => $user->email])
@@ -53,6 +57,7 @@ it('can send the password change email', function () {
 
     $user = User::factory()->unverified()->create();
 
+    /** @var Pest $this */
     $this
         ->livewire(RequestPasswordReset::class)
         ->fillForm(['email' => $user->email])
@@ -73,6 +78,7 @@ it('can reset the password with a valid token', function () {
 
     Event::fake();
 
+    /** @var Pest $this */
     $this
         ->livewire(ResetPassword::class, [
             'token' => $token,
@@ -106,6 +112,7 @@ it('shows a validation error if the token is invalid', function () {
 
     Event::fake();
 
+    /** @var Pest $this */
     $this
         ->livewire(ResetPassword::class, [
             'token' => $invalidToken,

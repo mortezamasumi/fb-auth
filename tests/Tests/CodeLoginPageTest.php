@@ -10,12 +10,14 @@ beforeEach(function () {
 });
 
 it('can render login page', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->assertSuccessful();
 });
 
 it('can see validation error on empty values', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->call('authenticate')
@@ -28,6 +30,7 @@ it('can see validation error on empty values', function () {
 it('can authenticate', function () {
     $user = User::factory()->create();
 
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->fillForm([
@@ -40,6 +43,7 @@ it('can authenticate', function () {
 });
 
 it('can get validation error on no exists user', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->fillForm([
@@ -55,6 +59,7 @@ it('can get validation error on no exists user', function () {
 it('can get validation error on expired user', function () {
     $user = User::factory()->expired()->create();
 
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->fillForm([
@@ -71,6 +76,7 @@ it('can get validation error on expired user', function () {
 it('can get validation error on not active user', function () {
     $user = User::factory()->noActive()->create();
 
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->fillForm([

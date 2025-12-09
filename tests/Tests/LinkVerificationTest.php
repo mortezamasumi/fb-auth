@@ -16,6 +16,7 @@ beforeEach(function () {
 });
 
 it('allows a verified user to access protected pages', function () {
+    /** @var Pest $this */
     $this
         ->actingAs(User::factory()->create())
         ->get(Dashboard::getUrl())
@@ -25,6 +26,7 @@ it('allows a verified user to access protected pages', function () {
 });
 
 it('redirect to send verification email page', function () {
+    /** @var Pest $this */
     $this
         ->actingAs(User::factory()->unverified()->create())
         ->get(Dashboard::getUrl())
@@ -34,6 +36,7 @@ it('redirect to send verification email page', function () {
 it('can resend the verification email from the prompt page', function () {
     Notification::fake();
 
+    /** @var Pest $this */
     $this
         ->actingAs($user = User::factory()->unverified()->create())
         ->livewire(EmailVerificationPrompt::class)
@@ -59,6 +62,7 @@ it('can verify a user when they click the verification link', function () {
         ]
     );
 
+    /** @var Pest $this */
     $this
         ->actingAs($user)
         ->get($verificationUrl)

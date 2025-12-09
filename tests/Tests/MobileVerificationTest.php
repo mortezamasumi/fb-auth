@@ -18,6 +18,7 @@ beforeEach(function () {
 });
 
 it('allows a verified user to access protected pages', function () {
+    /** @var Pest $this */
     $this
         ->actingAs(User::factory()->create())
         ->get(Dashboard::getUrl())
@@ -27,6 +28,7 @@ it('allows a verified user to access protected pages', function () {
 });
 
 it('redirect to verification code page', function () {
+    /** @var Pest $this */
     $this
         ->actingAs(User::factory()->unverified()->create())
         ->get(Dashboard::getUrl())
@@ -36,6 +38,7 @@ it('redirect to verification code page', function () {
 it('can resend the verification code from the prompt page', function () {
     Notification::fake();
 
+    /** @var Pest $this */
     $this
         ->actingAs($user = User::factory()->unverified()->create())
         ->livewire(VerificationPrompt::class)
@@ -54,6 +57,7 @@ it('can verify a user when they enter correct code', function () {
 
     Event::fake();
 
+    /** @var Pest $this */
     $form = $this
         ->actingAs($user)
         ->livewire(VerificationPrompt::class);
@@ -87,6 +91,7 @@ it('can fail on incorrect code', function () {
 
     expect($user->hasVerifiedEmail())->toBeFalse();
 
+    /** @var Pest $this */
     $this
         ->actingAs($user)
         ->livewire(VerificationPrompt::class)
@@ -104,6 +109,7 @@ it('can fail on expired code', function () {
 
     expect($user->hasVerifiedEmail())->toBeFalse();
 
+    /** @var Pest $this */
     $this
         ->actingAs($user)
         ->livewire(VerificationPrompt::class)

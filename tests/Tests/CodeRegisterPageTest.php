@@ -12,6 +12,7 @@ beforeEach(function () {
 });
 
 it('can redirect from login page to registeration page', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Login::class)
         ->assertActionExists('register')
@@ -19,12 +20,14 @@ it('can redirect from login page to registeration page', function () {
 });
 
 it('can render registeration page', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Register::class)
         ->assertSuccessful();
 });
 
 it('can get validation error', function () {
+    /** @var Pest $this */
     $this
         ->livewire(Register::class)
         ->call('register')
@@ -47,6 +50,7 @@ it('can register user', function () {
         'passwordConfirmation' => 'password123',
     ];
 
+    /** @var Pest $this */
     $this
         ->livewire(Register::class)
         ->fillForm($formData)
