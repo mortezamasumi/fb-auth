@@ -2,25 +2,29 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
+use Closure;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Auth\Pages\PasswordReset\RequestPasswordReset as BaseRequestPasswordReset;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
+use Filament\Panel;
 use Filament\Schemas\Schema;
+use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Mortezamasumi\FbAuth\Enums\AuthType;
+use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
-use Closure;
-use Exception;
 
 class RequestPasswordReset extends BaseRequestPasswordReset
 {
@@ -33,9 +37,14 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                     ->required()
                     ->tel()
                     ->rules([
-                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
-                            /** @disregard */
-                            $userModel = Auth::getProvider()->getModel();
+                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                            $provider = Auth::getProvider();
+
+                            if (! $provider instanceof EloquentUserProvider) {
+                                return;
+                            }
+
+                            $userModel = $provider->getModel();
 
                             $user = $userModel::where('mobile', $value)
                                 ->where('active', true)
@@ -46,10 +55,10 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                                 })
                                 ->first();
 
-                            if (!$user) {
+                            if (! $user) {
                                 $fail(__('filament-panels::auth/pages/login.messages.failed'));
                             }
-                        }
+                        },
                     ])
                     ->telRegex('/^((\+|00)[1-9][0-9 \-\(\)\.]{11,18}|09\d{9})$/')
                     ->maxLength(30)
@@ -60,9 +69,14 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                     ->required()
                     ->rules([
                         'email',
-                        fn(): Closure => function (string $attribute, $value, Closure $fail) {
-                            /** @disregard */
-                            $userModel = Auth::getProvider()->getModel();
+                        fn (): Closure => function (string $attribute, $value, Closure $fail) {
+                            $provider = Auth::getProvider();
+
+                            if (! $provider instanceof EloquentUserProvider) {
+                                return;
+                            }
+
+                            $userModel = $provider->getModel();
 
                             $user = $userModel::where('email', $value)
                                 ->where('active', true)
@@ -73,10 +87,10 @@ class RequestPasswordReset extends BaseRequestPasswordReset
                                 })
                                 ->first();
 
-                            if (!$user) {
+                            if (! $user) {
                                 $fail(__('filament-panels::auth/pages/login.messages.failed'));
                             }
-                        }
+                        },
                     ])
                     ->extraAttributes(['dir' => 'ltr'])
                     ->maxLength(255)
@@ -108,48 +122,56 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
         $data = $this->form->getState();
 
+        /** @var PasswordResetCodeNotification|PasswordResetMobileNotification|null $notification */
+        $notification = null;
+
         $status = Password::broker(Filament::getAuthPasswordBroker())->sendResetLink(
             $this->getCredentialsFromFormData($data),
             function (CanResetPassword $user, string $token) use (&$notification): void {
+                /** @var Panel $panel */
+                $panel = Filament::getCurrentOrDefaultPanel();
+
                 if (
                     ($user instanceof FilamentUser) &&
-                    (!$user->canAccessPanel(Filament::getCurrentOrDefaultPanel()))
+                    (! $user->canAccessPanel($panel))
                 ) {
                     return;
                 }
 
-                if (!method_exists($user, 'notify')) {
+                if (! method_exists($user, 'notify')) {
                     $userClass = $user::class;
 
                     throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
                 }
 
+                /** @var AuthType $authType */
+                $authType = config('fb-auth.auth_type');
+
                 $notification = app(
-                    match (config('fb-auth.auth_type')) {
+                    match ($authType) {
                         AuthType::Code => PasswordResetCodeNotification::class,
                         AuthType::Mobile => PasswordResetMobileNotification::class,
+                        default => throw new AuthTypeException,
                     },
                     [
                         'token' => $token,
-                        'code' => FbAuth::createCode($user)
+                        'code' => $user instanceof Model ? FbAuth::createCode($user) : null,
                     ]
                 );
+
+                $mobile = $user instanceof Model ? $user->getAttribute('mobile') : null;
 
                 $notification->url = Filament::getResetPasswordUrl(
                     $token,
                     $user,
-                    match (config('fb-auth.auth_type')) {
-                        AuthType::Code => [],
-                        AuthType::Mobile => ['mobile' => $user->mobile],
-                    }
+                    $authType === AuthType::Mobile ? ['mobile' => $mobile] : []
                 );
-
-                /** @var Notifiable $user */
-                $user->notify($notification);
 
                 if (class_exists(PasswordResetLinkSent::class)) {
                     event(new PasswordResetLinkSent($user));
                 }
+
+                \Illuminate\Support\Facades\Notification::send($user, $notification);
             },
         );
 
@@ -161,7 +183,10 @@ class RequestPasswordReset extends BaseRequestPasswordReset
 
         $this->getSentNotification($status)?->send();
 
-        /** @var PasswordResetCodeNotification|PasswordResetMobileNotification $notification */
+        if ($notification === null) {
+            return;
+        }
+
         redirect($notification->url);
     }
 
@@ -171,28 +196,28 @@ class RequestPasswordReset extends BaseRequestPasswordReset
      */
     protected function getCredentialsFromFormData(array $data): array
     {
-        return match (config('fb-auth.auth_type')) {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        return match ($authType) {
             AuthType::Code => ['email' => $data['email']],
             AuthType::Mobile => ['mobile' => $data['mobile']],
+            default => throw new AuthTypeException,
         };
     }
 
     protected function getSentNotification(string $status): ?Notification
     {
-        switch (config('fb-auth.auth_type')) {
-            case AuthType::Mobile:
-                $title = 'fb-auth::fb-auth.reset_password.request.notification.mobile.title';
-                $body = 'fb-auth::fb-auth.reset_password.request.notification.mobile.body';
-                break;
-            case AuthType::Code:
-                $title = 'fb-auth::fb-auth.reset_password.request.notification.code.title';
-                $body = 'fb-auth::fb-auth.reset_password.request.notification.code.body';
-                break;
+        $keys = FbAuth::getResetPasswordNotificationKeys();
+
+        $notification = Notification::make()
+            ->title(__($keys['title']))
+            ->success();
+
+        if ($status === Password::RESET_LINK_SENT) {
+            $notification->body(__($keys['body']));
         }
 
-        return Notification::make()
-            ->title(__($title))
-            ->body(($status === Password::RESET_LINK_SENT) ? __($body) : null)
-            ->success();
+        return $notification;
     }
 }

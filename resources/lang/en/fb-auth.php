@@ -38,7 +38,7 @@ return [
             'action' => [
                 'email' => 'Send email',
                 'mobile' => 'Send sms',
-            ]
+            ],
         ],
         'text_message' => ':app, Password reset code: :code',
         'mail_message' => [
@@ -66,7 +66,7 @@ return [
             ],
             'action' => [
                 'label' => 'Verify',
-            ]
+            ],
         ],
         'text_message' => ':app, Verify account code: :code',
         'mail_message' => [

@@ -9,10 +9,13 @@ use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Mortezamasumi\FbAuth\Enums\AuthType;
@@ -65,7 +68,10 @@ class Login extends BaseLogin
      */
     protected function getCredentialsFromFormData(array $data): array
     {
-        $key = match (config('fb-auth.auth_type')) {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        $key = match ($authType) {
             AuthType::Mobile => 'mobile',
             AuthType::Code => 'email',
             AuthType::Link => 'email',
@@ -94,12 +100,11 @@ class Login extends BaseLogin
         $authGuard = Filament::auth();
 
         $authProvider = $authGuard->getProvider();
-        /** @phpstan-ignore-line */
         $credentials = $this->getCredentialsFromFormData($data);
 
         $user = $authProvider->retrieveByCredentials($credentials);
 
-        if ((!$user) || (!$authProvider->validateCredentials($user, $credentials))) {
+        if ((! $user) || (! $authProvider->validateCredentials($user, $credentials))) {
             $this->userUndertakingMultiFactorAuthentication = null;
 
             $this->fireFailedEvent($authGuard, $user, $credentials);
@@ -113,7 +118,7 @@ class Login extends BaseLogin
             $this->multiFactorChallengeForm->validate();
         } else {
             foreach (Filament::getMultiFactorAuthenticationProviders() as $multiFactorAuthenticationProvider) {
-                if (!$multiFactorAuthenticationProvider->isEnabled($user)) {
+                if (! $multiFactorAuthenticationProvider->isEnabled($user)) {
                     continue;
                 }
 
@@ -133,20 +138,35 @@ class Login extends BaseLogin
             }
         }
 
+        /** @var Panel $panel */
+        $panel = Filament::getCurrentOrDefaultPanel();
+
         if (
-            !$authGuard->attemptWhen($credentials, function (Authenticatable $user): bool {
-                if (!($user instanceof FilamentUser)) {
+            ! $authGuard->attemptWhen($credentials, function (Authenticatable $user): bool {
+                if (! ($user instanceof FilamentUser)) {
                     return true;
                 }
 
-                return $user->canAccessPanel(Filament::getCurrentOrDefaultPanel());
+                /** @var Panel $panel */
+                $panel = Filament::getCurrentOrDefaultPanel();
+
+                return $user->canAccessPanel($panel);
             }, $data['remember'] ?? false)
         ) {
             $this->fireFailedEvent($authGuard, $user, $credentials);
             $this->throwFailureValidationException();
         }
 
-        if ((!$user->active) || ($user->expiration_date && $user->expiration_date->isPast())) {
+        if (! $user instanceof Model) {
+            $this->throwFailureExpirationException();
+        }
+
+        $expirationDate = $user->getAttribute('expiration_date');
+
+        if (
+            (! $user->getAttribute('active')) ||
+            ($expirationDate instanceof Carbon && $expirationDate->isPast())
+        ) {
             Filament::auth()->logout();
 
             $this->fireFailedEvent($authGuard, $user, $credentials);
@@ -160,7 +180,10 @@ class Login extends BaseLogin
 
     protected function throwFailureValidationException(): never
     {
-        $key = match (config('fb-auth.auth_type')) {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        $key = match ($authType) {
             AuthType::Mobile => 'mobile',
             AuthType::Code => 'email',
             AuthType::Link => 'email',
@@ -168,13 +191,16 @@ class Login extends BaseLogin
         };
 
         throw ValidationException::withMessages([
-            'data.' . $key => __('filament-panels::auth/pages/login.messages.failed'),
+            'data.'.$key => __('filament-panels::auth/pages/login.messages.failed'),
         ]);
     }
 
     protected function throwFailureExpirationException(): never
     {
-        $key = match (config('fb-auth.auth_type')) {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        $key = match ($authType) {
             AuthType::Mobile => 'mobile',
             AuthType::Code => 'email',
             AuthType::Link => 'email',
@@ -182,8 +208,7 @@ class Login extends BaseLogin
         };
 
         throw ValidationException::withMessages([
-            'data.' . $key => __('filament-panels::auth/pages/login.messages.failed'),
-            // 'data.' . $key => __('fb-auth::fb-auth.expiration.message'),
+            'data.'.$key => __('filament-panels::auth/pages/login.messages.failed'),
         ]);
     }
 }

@@ -10,7 +10,7 @@ class VerifyMobileNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $url;
+    public ?string $url = null;
 
     public function __construct(
         protected string $code,
@@ -21,7 +21,10 @@ class VerifyMobileNotification extends Notification implements ShouldQueue
         return $this->code;
     }
 
-    public function via($notifiable)
+    /**
+     * @return array<string>
+     */
+    public function via(object $notifiable): array
     {
         return ['sms'];
     }

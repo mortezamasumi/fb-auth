@@ -2,8 +2,6 @@
 
 namespace Mortezamasumi\FbAuth\Enums;
 
-use App\Models\User;
-
 enum AuthType: string
 {
     case User = 'user';
@@ -11,6 +9,10 @@ enum AuthType: string
     case Mobile = 'mobile';
     case Link = 'link';
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     public function resolveRecord(mixed $data): array
     {
         return match ($this) {

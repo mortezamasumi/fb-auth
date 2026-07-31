@@ -8,7 +8,6 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Mortezamasumi\FbAuth\Enums\AuthType;
-use Mortezamasumi\FbAuth\Notifications\VerifyCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\VerifyMobileNotification;
 use Mortezamasumi\FbAuth\Pages\VerificationPrompt;
 use Mortezamasumi\FbAuth\Tests\Services\User;

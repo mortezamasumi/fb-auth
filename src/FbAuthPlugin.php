@@ -28,30 +28,40 @@ class FbAuthPlugin implements Plugin
             $panel->registration(Register::class);
         }
 
-        switch (config('fb-auth.auth_type')) {
-            case AuthType::Link:
-                if ($panel->hasEmailVerification()) {
-                    $panel->emailChangeVerification(false);
-                }
-                break;
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
 
-            case AuthType::User:
-                $panel
-                    ->emailVerification(null)
-                    ->passwordReset(null, null);
-                break;
+        match ($authType) {
+            AuthType::Link => $this->configureLinkFlow($panel),
+            AuthType::User => $this->configureUserFlow($panel),
+            AuthType::Code, AuthType::Mobile => $this->configureCodeFlow($panel),
+        };
+    }
 
-            default:
-                if ($panel->hasPasswordReset()) {
-                    $panel->passwordReset(RequestPasswordReset::class, ResetPassword::class);
-                }
+    protected function configureLinkFlow(Panel $panel): void
+    {
+        if ($panel->hasEmailVerification()) {
+            $panel->emailChangeVerification(false);
+        }
+    }
 
-                if ($panel->hasEmailVerification()) {
-                    $panel
-                        ->emailVerification(VerificationPrompt::class)
-                        ->emailChangeVerification(false);
-                }
-                break;
+    protected function configureUserFlow(Panel $panel): void
+    {
+        $panel
+            ->emailVerification(null)
+            ->passwordReset(null, null);
+    }
+
+    protected function configureCodeFlow(Panel $panel): void
+    {
+        if ($panel->hasPasswordReset()) {
+            $panel->passwordReset(RequestPasswordReset::class, ResetPassword::class);
+        }
+
+        if ($panel->hasEmailVerification()) {
+            $panel
+                ->emailVerification(VerificationPrompt::class)
+                ->emailChangeVerification(false);
         }
     }
 

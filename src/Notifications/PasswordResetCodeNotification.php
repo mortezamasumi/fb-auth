@@ -10,13 +10,17 @@ class PasswordResetCodeNotification extends ResetPassword
 {
     protected string $code;
 
+    /**
+     * @param  string  $token
+     * @param  string  $code
+     */
     public function __construct($token, $code)
     {
         $this->token = $token;
         $this->code = $code;
     }
 
-    protected function buildMailMessage($url)
+    protected function buildMailMessage($url): MailMessage
     {
         return (new MailMessage)
             ->subject(__('fb-auth::fb-auth.reset_password.mail_message.subject'))
@@ -27,7 +31,7 @@ class PasswordResetCodeNotification extends ResetPassword
             ->line(__('fb-auth::fb-auth.reset_password.mail_message.timeout', ['count' => (int) (config('fb-auth.otp_expiration') / 60)]))
             ->line(__('fb-auth::fb-auth.reset_password.mail_message.ending'))
             ->salutation(new HtmlString(__('fb-auth::fb-auth.reset_password.mail_message.salutation', [
-                'name' => __(config('app.name'))
+                'name' => __(config('app.name')),
             ])));
     }
 }

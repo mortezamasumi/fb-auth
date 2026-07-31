@@ -10,13 +10,16 @@ class PasswordResetMobileNotification extends Notification implements ShouldQueu
 {
     use Queueable;
 
-    public $url;
+    public ?string $url = null;
 
     public function __construct(
         protected string $code,
     ) {}
 
-    public function via($notifiable)
+    /**
+     * @return array<string>
+     */
+    public function via(object $notifiable): array
     {
         return ['sms'];
     }

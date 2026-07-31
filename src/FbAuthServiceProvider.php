@@ -2,13 +2,13 @@
 
 namespace Mortezamasumi\FbAuth;
 
+use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Livewire\Features\SupportTesting\Testable;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
-use Mortezamasumi\FbAuth\FbAuth;
 use Mortezamasumi\FbAuth\Testing\TestsFbAuth;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -32,15 +32,15 @@ class FbAuthServiceProvider extends PackageServiceProvider
             ->hasViews();
     }
 
-    public function packageRegistered()
+    public function packageRegistered(): void
     {
-        $this->app->singleton('FbAuth', fn ($app) => new FbAuth());
+        $this->app->singleton('FbAuth', fn ($app) => new FbAuth);
 
         if (! (config('fb-auth.auth_type') instanceof AuthType)) {
             config(['fb-auth.auth_type' => AuthType::tryFrom(config('fb-auth.auth_type'))]);
         }
 
-        throw_unless(config('fb-auth.auth_type'), new AuthTypeException());
+        throw_unless(config('fb-auth.auth_type'), new AuthTypeException);
     }
 
     public function packageBooted(): void
@@ -53,7 +53,7 @@ class FbAuthServiceProvider extends PackageServiceProvider
         Testable::mixin(new TestsFbAuth);
     }
 
-    protected function getAssetPackageName(): ?string
+    protected function getAssetPackageName(): string
     {
         return 'mortezamasumi/fb-auth';
     }

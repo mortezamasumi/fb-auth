@@ -38,7 +38,7 @@ return [
             'action' => [
                 'email' => 'ارسال ایمیل',
                 'mobile' => 'ارسال پیامک',
-            ]
+            ],
         ],
         'text_message' => ':app, کد جهت تغییر رمز: :code',
         'mail_message' => [
@@ -66,7 +66,7 @@ return [
             ],
             'action' => [
                 'label' => 'ارسال',
-            ]
+            ],
         ],
         'text_message' => ':app, کد تایید حساب‌کاربری: :code',
         'mail_message' => [

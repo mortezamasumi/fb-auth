@@ -2,6 +2,7 @@
 
 namespace Mortezamasumi\FbAuth\Pages;
 
+use Exception;
 use Filament\Auth\Pages\Register as BaseRegister;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -9,10 +10,10 @@ use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Mortezamasumi\FbAuth\Enums\AuthType;
+use Mortezamasumi\FbAuth\Exceptions\AuthTypeException;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\VerifyCodeNotification;
 use Mortezamasumi\FbAuth\Notifications\VerifyMobileNotification;
-use Exception;
 
 class Register extends BaseRegister
 {
@@ -82,10 +83,14 @@ class Register extends BaseRegister
             throw new Exception("Model [{$userClass}] does not have a [notify()] method.");
         }
 
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
         $notification = app(
-            match (config('fb-auth.auth_type')) {
+            match ($authType) {
                 AuthType::Code => VerifyCodeNotification::class,
                 AuthType::Mobile => VerifyMobileNotification::class,
+                default => throw new AuthTypeException,
             },
             [
                 'code' => FbAuth::createCode($user),

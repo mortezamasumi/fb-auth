@@ -25,28 +25,55 @@ class FbAuth
         $min = pow(10, $digits - 1);
         $max = pow(10, $digits) - 1;
 
-        // return '1234';
-        return str_pad(random_int($min, $max), $digits, '0', STR_PAD_LEFT);
+        return str_pad((string) random_int($min, $max), $digits, '0', STR_PAD_LEFT);
     }
 
     public function createCode(Model $user): string
     {
         $code = $this->generateRandomCode();
 
-        $identifire = match (config('fb-auth.auth_type')) {
-            AuthType::Mobile => $user->mobile,
-            AuthType::Code => $user->email,
-            default => $user->id,
-        };
+        $identifier = $this->resolveIdentifier($user);
 
-        Cache::forget('otp-'.$identifire);
+        Cache::forget('otp-'.$identifier);
 
         Cache::add(
-            'otp-'.$identifire,
+            'otp-'.$identifier,
             [$code, now()],
             (int) config('fb-auth.otp_expiration')
         );
 
         return $code;
+    }
+
+    protected function resolveIdentifier(Model $user): string
+    {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        return match ($authType) {
+            AuthType::Mobile => (string) $user->getAttribute('mobile'),
+            AuthType::Code => (string) $user->getAttribute('email'),
+            default => (string) $user->getKey(),
+        };
+    }
+
+    /**
+     * @return array{title: string, body: string}
+     */
+    public function getResetPasswordNotificationKeys(): array
+    {
+        /** @var AuthType $authType */
+        $authType = config('fb-auth.auth_type');
+
+        return match ($authType) {
+            AuthType::Mobile => [
+                'title' => 'fb-auth::fb-auth.reset_password.request.notification.mobile.title',
+                'body' => 'fb-auth::fb-auth.reset_password.request.notification.mobile.body',
+            ],
+            default => [
+                'title' => 'fb-auth::fb-auth.reset_password.request.notification.code.title',
+                'body' => 'fb-auth::fb-auth.reset_password.request.notification.code.body',
+            ],
+        };
     }
 }
