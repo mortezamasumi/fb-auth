@@ -5,6 +5,7 @@ use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 use Mortezamasumi\FbAuth\Enums\AuthType;
 use Mortezamasumi\FbAuth\Facades\FbAuth;
 use Mortezamasumi\FbAuth\Notifications\PasswordResetMobileNotification;
@@ -101,7 +102,6 @@ it('can send the password change notification', function () {
     ]);
 });
 
-return;
 it('can reset the password with a valid code', function () {
     Notification::fake();
     Event::fake();
@@ -113,17 +113,20 @@ it('can reset the password with a valid code', function () {
 
     $token = app('auth.password.broker')->createToken($user);
 
-    /** @var Pest $this */
-    $this
-        ->livewire(ResetPassword::class, [
+    // the production page is reached via a signed URL containing ?mobile=...,
+    // which mount() reads from the query string; component tests have no
+    // request query, so provide it the same way the real link does
+    $component = Livewire::withQueryParams(['mobile' => $user->mobile])
+        ->test(ResetPassword::class, [
             'token' => $token,
             'email' => $user->email,
-        ])
-        ->fillForm([
-            'otp' => $code,
-            'password' => $newPassword = 'new-strong-password',
-            'passwordConfirmation' => $newPassword,
-        ])
+        ]);
+
+    $component->fillForm([
+        'otp' => $code,
+        'password' => $newPassword = 'new-strong-password',
+        'passwordConfirmation' => $newPassword,
+    ])
         ->call('resetPassword')
         ->assertHasNoFormErrors();
 
