@@ -36,7 +36,7 @@ class ResetPassword extends BaseResetPassword
     #[Locked]
     public ?string $mobile = null;
 
-    public ?string $otp = null;
+    public ?string $otp = '';
 
     public function mount(?string $email = null, ?string $token = null): void
     {
