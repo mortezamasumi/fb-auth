@@ -10,11 +10,7 @@ class PasswordResetCodeNotification extends ResetPassword
 {
     protected string $code;
 
-    /**
-     * @param  string  $token
-     * @param  string  $code
-     */
-    public function __construct($token, $code)
+    public function __construct(string $token, string $code)
     {
         $this->token = $token;
         $this->code = $code;
